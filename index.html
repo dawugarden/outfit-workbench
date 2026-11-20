@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>每日穿搭工作台</title>
+<meta name="description" content="拍照就能入库的私人衣橱，按天气和场合一键配好穿搭、口红、腮红与配饰。">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#FBF7F2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="穿搭工作台">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/favicon.png">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <header class="topbar">
+    <div class="brand"><span class="logo">🎀</span> 每日穿搭工作台</div>
+    <button class="ic" id="btnInstallTop" hidden>安装</button>
+  </header>
+
+  <main id="main">
+
+    <!-- ================= 今日搭配 ================= -->
+    <section class="page show" id="page-today">
+      <div class="banner" id="sampleBanner" hidden>
+        现在展示的是<b>示例衣橱</b>，随便点点看效果；确认好用后到「我的」一键清空，再把你自己的衣服拍进来。
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>🌤️ 今天什么天气</h2></div>
+        <div class="temp-row">
+          <button class="round-btn" id="tempMinus">−</button>
+          <input type="number" id="tempInput" value="18" inputmode="numeric" min="-20" max="45">
+          <span class="unit">℃</span>
+          <button class="round-btn" id="tempPlus">＋</button>
+          <div class="temp-band" id="tempBandLabel"></div>
+        </div>
+        <div class="chips" id="quickTemp"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>📍 今天什么场合</h2></div>
+        <div class="chips" id="occChips"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>👕 今天穿什么</h2>
+          <span class="hint">点一下选中，角标提示是否适合今天温度</span>
+        </div>
+        <div id="pickerArea"></div>
+        <div class="btn-row">
+          <button class="btn ghost" id="autoPickBtn">🎲 帮我搭一套</button>
+          <button class="btn" id="goBtn">✨ 生成搭配</button>
+        </div>
+      </div>
+
+      <div id="resultBox"></div>
+    </section>
+
+    <!-- ================= 衣橱 ================= -->
+    <section class="page" id="page-wardrobe">
+      <div class="page-head">
+        <div class="filters" id="wFilter"></div>
+        <button class="btn mini" data-add="clothes">＋ 添加</button>
+      </div>
+      <div id="wGrid" class="grid"></div>
+    </section>
+
+    <!-- ================= 彩妆 ================= -->
+    <section class="page" id="page-makeup">
+      <div class="card quick">
+        <div class="card-h"><h2>⚡ 一句话速录</h2>
+          <span class="pill">自动识别属性</span>
+        </div>
+        <div class="hint" style="margin-bottom:10px">
+          直接打名字就行：<b>MAC 923</b>、<b>迪奥999</b>、<b>YSL 小金条1966</b>、<b>豆沙色口红</b>。
+          色系、色块、冷暖属性会自动填好。
+        </div>
+        <div class="quick-row">
+          <input id="quickInput" type="text" placeholder="例：NARS GINA / 香奈儿58 / 番茄色唇釉" autocomplete="off">
+          <button class="btn mini" id="quickAdd">识别并保存</button>
+        </div>
+        <div id="quickResult" class="quick-result"></div>
+      </div>
+
+      <div class="seg" id="mSeg">
+        <button class="on" data-mt="lip">💄 口红</button>
+        <button data-mt="blush">🌸 腮红</button>
+        <button data-mt="base">🧴 底妆</button>
+        <button data-mt="eye">🎨 眼影</button>
+      </div>
+      <div class="page-head">
+        <span class="hint" id="mCount"></span>
+        <button class="btn mini" data-add="makeup">＋ 添加</button>
+      </div>
+      <div id="mList" class="grid"></div>
+    </section>
+
+    <!-- ================= 配饰 ================= -->
+    <section class="page" id="page-acc">
+      <div class="page-head">
+        <div class="filters" id="aFilter"></div>
+        <button class="btn mini" data-add="acc">＋ 添加</button>
+      </div>
+      <div id="aGrid" class="grid"></div>
+    </section>
+
+    <!-- ================= 我的 ================= -->
+    <section class="page" id="page-me">
+
+      <div class="card install">
+        <div class="card-h"><h2>📲 装到桌面</h2></div>
+        <div id="installBox"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>🤖 AI 识图（可选）</h2>
+          <span class="pill" id="aiState">未配置</span>
+        </div>
+        <div class="hint" style="margin-bottom:12px">
+          不填也能用：拍照时会<b>自动取色</b>、按你的文字描述自动填类别厚薄。填了 Key 之后，拍照能直接认出
+          「米白色针织开衫 / 厚薄4 / 针织」，一步入库更省事。
+        </div>
+        <label class="lbl">服务商</label>
+        <select id="aiPreset"></select>
+        <p class="mini-tip" id="aiPresetTip"></p>
+        <label class="lbl">接口地址</label>
+        <input id="aiBaseUrl" type="url" placeholder="https://.../v1/chat/completions">
+        <label class="lbl">模型名</label>
+        <input id="aiModel" type="text" placeholder="glm-4v-flash">
+        <label class="lbl">API Key</label>
+        <input id="aiKey" type="password" placeholder="只存在这台设备的本地存储里">
+        <div class="btn-row" style="justify-content:flex-start">
+          <button class="btn mini" id="aiSave">保存</button>
+          <button class="btn mini ghost" id="aiTest">测试连接</button>
+        </div>
+        <div id="aiTestMsg" class="mini-tip"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>📖 搭配记录</h2></div>
+        <div id="histList"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>🗂️ 数据</h2></div>
+        <div class="stat" id="statBox"></div>
+        <div class="btn-row" style="justify-content:flex-start">
+          <button class="btn mini ghost" id="btnExport">导出备份</button>
+          <button class="btn mini ghost" id="btnImport">导入备份</button>
+          <button class="btn mini ghost" id="btnClearSample">清空示例</button>
+        </div>
+        <p class="mini-tip">
+          数据只存在这台手机的浏览器里（照片存 IndexedDB）。换手机 / 清缓存前记得先导出备份。
+        </p>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>🔁 从旧版迁移</h2></div>
+        <p class="mini-tip">
+          旧版数据在另一个网址下，浏览器不会自动带过来。打开旧版页面 → 长按 / 右键「检查」→ Console 里粘贴下面这行回车，
+          把它复制出来，再点上面的「导入备份」粘贴即可。
+        </p>
+        <pre class="code" id="migrateCode">copy(localStorage.getItem('outfit_makeup_station_v1'))</pre>
+        <button class="btn mini ghost" id="btnCopyCode">复制这行代码</button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="on" data-page="today"><i>✨</i><span>今日</span></button>
+    <button data-page="wardrobe"><i>👕</i><span>衣橱</span></button>
+    <button data-page="makeup"><i>💄</i><span>彩妆</span></button>
+    <button data-page="acc"><i>💎</i><span>配饰</span></button>
+    <button data-page="me"><i>👤</i><span>我的</span></button>
+  </nav>
+
+</div>
+
+<!-- 添加 / 识别 弹层 -->
+<div class="sheet-wrap" id="sheet" hidden>
+  <div class="sheet-mask" data-close="1"></div>
+  <div class="sheet">
+    <div class="sheet-bar"><span id="sheetTitle">添加</span><button class="ic" data-close="1">✕</button></div>
+    <div class="sheet-body" id="sheetBody"></div>
+  </div>
+</div>
+
+<!-- 大图预览 -->
+<div class="viewer" id="viewer" hidden>
+  <img id="viewerImg" alt="">
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="js/data.js"></script>
+<script src="js/data_extra.js"></script>
+<script src="js/store.js"></script>
+<script src="js/vision.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
